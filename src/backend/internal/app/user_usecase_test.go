@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -57,6 +58,10 @@ func (m *mockUserRepo) UpdateDisplayName(_ context.Context, _ uuid.UUID, name st
 
 func (m *mockUserRepo) SetNeedsReauth(_ context.Context, _ uuid.UUID, flag bool) error {
 	m.needsReauthSet = flag
+	return nil
+}
+
+func (m *mockUserRepo) SetLastSyncedAt(_ context.Context, _ uuid.UUID, _ time.Time) error {
 	return nil
 }
 

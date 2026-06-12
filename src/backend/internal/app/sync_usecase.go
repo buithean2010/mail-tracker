@@ -87,7 +87,12 @@ func (uc *SyncUseCase) syncUser(ctx context.Context, user *domain.User) error {
 		token = newToken
 	}
 
-	since := time.Now().Add(-30 * 24 * time.Hour) // pull last 30 days on first sync
+	since := time.Now().Add(-30 * 24 * time.Hour) // default: 30 days on first sync
+	if user.LastSyncedAt != nil {
+		since = *user.LastSyncedAt
+	}
+	syncStarted := time.Now().UTC()
+
 	messages, err := uc.mailClient.FetchMessages(ctx, token.AccessToken, since)
 	if err != nil {
 		return fmt.Errorf("fetch messages: %w", err)
@@ -135,6 +140,10 @@ func (uc *SyncUseCase) syncUser(ctx context.Context, user *domain.User) error {
 		if err := uc.threadRepo.Upsert(ctx, thread); err != nil {
 			log.Printf("upsert thread %s: %v", convID, err)
 		}
+	}
+
+	if err := uc.userRepo.SetLastSyncedAt(ctx, user.ID, syncStarted); err != nil {
+		log.Printf("set last_synced_at user %s: %v", user.ID, err)
 	}
 
 	uc.broker.Publish(user.ID, "sync_complete", map[string]string{"user_id": user.ID.String()})

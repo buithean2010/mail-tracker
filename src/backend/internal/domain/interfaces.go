@@ -15,6 +15,7 @@ type UserRepo interface {
 	UpdateFilterSettings(ctx context.Context, userID uuid.UUID, settings json.RawMessage) error
 	UpdateDisplayName(ctx context.Context, userID uuid.UUID, name string) error
 	SetNeedsReauth(ctx context.Context, userID uuid.UUID, flag bool) error
+	SetLastSyncedAt(ctx context.Context, userID uuid.UUID, t time.Time) error
 }
 
 type SessionRepo interface {

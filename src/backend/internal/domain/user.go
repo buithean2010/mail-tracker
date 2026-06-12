@@ -14,6 +14,7 @@ type User struct {
 	DisplayName    string          `json:"display_name"`
 	FilterSettings json.RawMessage `json:"filter_settings"`
 	NeedsReauth    bool            `json:"needs_reauth"`
+	LastSyncedAt   *time.Time      `json:"last_synced_at"`
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`
 }

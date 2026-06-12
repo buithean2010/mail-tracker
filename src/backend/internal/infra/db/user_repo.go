@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -22,13 +23,13 @@ func NewUserRepo(pool *pgxpool.Pool) *UserRepo {
 }
 
 func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
-	const q = `SELECT id, microsoft_id, email, display_name, filter_settings, needs_reauth, created_at, updated_at
+	const q = `SELECT id, microsoft_id, email, display_name, filter_settings, needs_reauth, last_synced_at, created_at, updated_at
                FROM users WHERE id = $1`
 	return r.scan(r.pool.QueryRow(ctx, q, id))
 }
 
 func (r *UserRepo) GetByMicrosoftID(ctx context.Context, msID string) (*domain.User, error) {
-	const q = `SELECT id, microsoft_id, email, display_name, filter_settings, needs_reauth, created_at, updated_at
+	const q = `SELECT id, microsoft_id, email, display_name, filter_settings, needs_reauth, last_synced_at, created_at, updated_at
                FROM users WHERE microsoft_id = $1`
 	return r.scan(r.pool.QueryRow(ctx, q, msID))
 }
@@ -66,10 +67,17 @@ func (r *UserRepo) SetNeedsReauth(ctx context.Context, userID uuid.UUID, flag bo
 	return err
 }
 
+func (r *UserRepo) SetLastSyncedAt(ctx context.Context, userID uuid.UUID, t time.Time) error {
+	_, err := r.pool.Exec(ctx,
+		`UPDATE users SET last_synced_at = $1, updated_at = NOW() WHERE id = $2`,
+		t.UTC(), userID)
+	return err
+}
+
 func (r *UserRepo) scan(row pgx.Row) (*domain.User, error) {
 	var u domain.User
 	err := row.Scan(&u.ID, &u.MicrosoftID, &u.Email, &u.DisplayName,
-		&u.FilterSettings, &u.NeedsReauth, &u.CreatedAt, &u.UpdatedAt)
+		&u.FilterSettings, &u.NeedsReauth, &u.LastSyncedAt, &u.CreatedAt, &u.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, domain.ErrNotFound
 	}
