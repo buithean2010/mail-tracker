@@ -12,14 +12,14 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P01_01 | todo | Initialize the Go module (`go.mod`), `internal/{domain,app,infra,handler}` directories, basic Makefile |
-| P01_02 | todo | Initialize the Vue 3 + Vite frontend (`pnpm create vite`), configure TypeScript + path aliases |
-| P01_03 | todo | `docker-compose.yml` for local dev: postgres + backend (air) + frontend (HMR) + nginx, bind mount source code |
-| P01_04 | todo | `docker-compose.prod.yml` for production: multi-stage Go + Vue build, no ports exposed except through Nginx |
-| P01_05 | todo | Nginx config: `nginx.dev.conf` (proxy → containers), `nginx.prod.conf` (SSL termination + serve static files) |
-| P01_06 | todo | `.env.example` with all required variables, config loader in Go (`viper` or env package) |
-| P01_07 | todo | Multi-stage `backend/Dockerfile` (build binary + minimal runtime), multi-stage `frontend/Dockerfile` (dev + build + nginx) |
-| P01_08 | todo | `.air.toml` for Go hot reload inside the container |
+| P01_01 | done | Initialize the Go module (`go.mod`), `internal/{domain,app,infra,handler}` directories, basic Makefile |
+| P01_02 | done | Initialize the Vue 3 + Vite frontend (`pnpm create vite`), configure TypeScript + path aliases |
+| P01_03 | done | `docker-compose.yml` for local dev: postgres + backend (air) + frontend (HMR) + nginx, bind mount source code |
+| P01_04 | done | `docker-compose.prod.yml` for production: multi-stage Go + Vue build, no ports exposed except through Nginx |
+| P01_05 | done | Nginx config: `nginx.dev.conf` (proxy → containers), `nginx.prod.conf` (SSL termination + serve static files) |
+| P01_06 | done | `.env.example` with all required variables, config loader in Go (`viper` or env package) |
+| P01_07 | done | Multi-stage `backend/Dockerfile` (build binary + minimal runtime), multi-stage `frontend/Dockerfile` (dev + build + nginx) |
+| P01_08 | done | `.air.toml` for Go hot reload inside the container |
 
 ---
 
@@ -27,13 +27,13 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P02_01 | todo | Choose a migration tool (`golang-migrate`), set up the `migrate` binary in the backend container |
-| P02_02 | todo | Migration: `users` table — profile, `filter_settings` JSONB, `needs_reauth` flag |
-| P02_03 | todo | Migration: `sessions` table — random hex `session_id` → `user_id`, expires in 7 days |
-| P02_04 | todo | Migration: `user_tokens` table — encrypted `access_token` + `refresh_token`, `expires_at` |
-| P02_05 | todo | Migration: `user_api_keys` table — `ai_mode` (`byok`/`power_automate`), encrypted `api_key`, `model`, encrypted `pa_webhook_url` |
-| P02_06 | todo | Migration: `email_threads` table — Tier 1 fields + Tier 2 fields + `summary_status` enum (`pending`/`processing`/`done`/`failed`/`no_key`) |
-| P02_07 | todo | Indexes: `email_threads(user_id, received_at DESC)`, `sessions(session_id)`, `sessions(expires_at)` |
+| P02_01 | done | Choose a migration tool (`golang-migrate`), set up the `migrate` binary in the backend container |
+| P02_02 | done | Migration: `users` table — profile, `filter_settings` JSONB, `needs_reauth` flag |
+| P02_03 | done | Migration: `sessions` table — random hex `session_id` → `user_id`, expires in 7 days |
+| P02_04 | done | Migration: `user_tokens` table — encrypted `access_token` + `refresh_token`, `expires_at` |
+| P02_05 | done | Migration: `user_api_keys` table — `ai_mode` (`byok`/`power_automate`), encrypted `api_key`, `model`, encrypted `pa_webhook_url` |
+| P02_06 | done | Migration: `email_threads` table — Tier 1 fields + Tier 2 fields + `summary_status` enum (`pending`/`processing`/`done`/`failed`/`no_key`) |
+| P02_07 | done | Indexes: `email_threads(user_id, received_at DESC)`, `sessions(session_id)`, `sessions(expires_at)` |
 
 ---
 
@@ -41,15 +41,15 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P03_01 | todo | Configure the Microsoft Entra ID app registration (redirect URI, scopes: `openid profile email Mail.Read`) |
-| P03_02 | todo | `GET /auth/login` — build Microsoft authorization URL, redirect, store the state param in a cookie |
-| P03_03 | todo | `GET /auth/callback` — validate state, exchange code → access token + refresh token, upsert user |
-| P03_04 | todo | AES-256 encryption service (`internal/infra/crypto`) for token storage |
-| P03_05 | todo | Save tokens in `user_tokens` (encrypted), create a session record, set the `session_id` HttpOnly cookie |
-| P03_06 | todo | Session middleware — validate cookie → load user from DB, inject into context |
-| P03_07 | todo | Automatic token refresh: when the access token is close to expiry (<5 minutes), call the refresh endpoint and update the DB |
-| P03_08 | todo | `POST /auth/logout` — delete session record, clear cookie |
-| P03_09 | todo | `needs_reauth` flow: set flag when refresh token fails, return 401 with `{"error":"reauth_required"}`, frontend redirects to login |
+| P03_01 | done | Configure the Microsoft Entra ID app registration (redirect URI, scopes: `openid profile email Mail.Read`) |
+| P03_02 | done | `GET /auth/login` — build Microsoft authorization URL, redirect, store the state param in a cookie |
+| P03_03 | done | `GET /auth/callback` — validate state, exchange code → access token + refresh token, upsert user |
+| P03_04 | done | AES-256 encryption service (`internal/infra/crypto`) for token storage |
+| P03_05 | done | Save tokens in `user_tokens` (encrypted), create a session record, set the `session_id` HttpOnly cookie |
+| P03_06 | done | Session middleware — validate cookie → load user from DB, inject into context |
+| P03_07 | done | Automatic token refresh: when the access token is close to expiry (<5 minutes), call the refresh endpoint and update the DB |
+| P03_08 | done | `POST /auth/logout` — delete session record, clear cookie |
+| P03_09 | done | `needs_reauth` flow: set flag when refresh token fails, return 401 with `{"error":"reauth_required"}`, frontend redirects to login |
 
 ---
 
@@ -57,14 +57,14 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P04_01 | todo | `domain/` — Go structs: `User`, `Session`, `UserToken`, `UserAPIKey`, `EmailThread`, `FilterSettings` |
-| P04_02 | todo | `domain/` — Interface definitions: `UserRepo`, `SessionRepo`, `TokenRepo`, `ThreadRepo`, `APIKeyRepo` |
-| P04_03 | todo | `domain/` — Interface definitions: `MailClient`, `AIClient`, `PAClient`, `Encryptor` |
-| P04_04 | todo | `app/` — Use case: `AuthUseCase` (login flow, logout, token refresh) |
-| P04_05 | todo | `app/` — Use case: `SyncUseCase` (pull mail, apply filters, save threads) |
-| P04_06 | todo | `app/` — Use case: `SummaryUseCase` (fallback chain: BYOK → PA → no_key) |
-| P04_07 | todo | `app/` — Use case: `ThreadUseCase` (list with filters, update status/notes, trigger re-summary) |
-| P04_08 | todo | `app/` — Use case: `UserUseCase` (get profile, update `display_name`, filter settings CRUD, API key CRUD) |
+| P04_01 | done | `domain/` — Go structs: `User`, `Session`, `UserToken`, `UserAPIKey`, `EmailThread`, `FilterSettings` |
+| P04_02 | done | `domain/` — Interface definitions: `UserRepo`, `SessionRepo`, `TokenRepo`, `ThreadRepo`, `APIKeyRepo` |
+| P04_03 | done | `domain/` — Interface definitions: `MailClient`, `AIClient`, `PAClient`, `Encryptor` |
+| P04_04 | done | `app/` — Use case: `AuthUseCase` (login flow, logout, token refresh) |
+| P04_05 | done | `app/` — Use case: `SyncUseCase` (pull mail, apply filters, save threads) |
+| P04_06 | done | `app/` — Use case: `SummaryUseCase` (fallback chain: BYOK → PA → no_key) |
+| P04_07 | done | `app/` — Use case: `ThreadUseCase` (list with filters, update status/notes, trigger re-summary) |
+| P04_08 | done | `app/` — Use case: `UserUseCase` (get profile, update `display_name`, filter settings CRUD, API key CRUD) |
 
 ---
 
@@ -72,14 +72,14 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P05_01 | todo | PostgreSQL repositories: implement `UserRepo`, `SessionRepo`, `TokenRepo` (`pgx` or `sqlx`) |
-| P05_02 | todo | PostgreSQL repositories: implement `ThreadRepo`, `APIKeyRepo` — including JSONB filters and pagination |
-| P05_03 | todo | Microsoft Graph API client: `GET /me/mailFolders/Inbox/messages`, `$select` fields, `$filter`, `$orderby`, paging with `@odata.nextLink` |
-| P05_04 | todo | Graph API: parse `conversationId`, group messages into threads, sort `receivedDateTime asc` (Phase 1 strategy) |
-| P05_05 | todo | OpenAI client: call the Chat Completions API, parse JSON output (summary, priority, action_required) |
-| P05_06 | todo | OpenRouter client: same interface as OpenAI, different base URL + auth header |
-| P05_07 | todo | Power Automate client (POC): POST to webhook URL, parse Copilot JSON response |
-| P05_08 | todo | Retry + timeout logic for all external HTTP calls (3 retries with backoff, 30s timeout) |
+| P05_01 | done | PostgreSQL repositories: implement `UserRepo`, `SessionRepo`, `TokenRepo` (`pgx` or `sqlx`) |
+| P05_02 | done | PostgreSQL repositories: implement `ThreadRepo`, `APIKeyRepo` — including JSONB filters and pagination |
+| P05_03 | done | Microsoft Graph API client: `GET /me/mailFolders/Inbox/messages`, `$select` fields, `$filter`, `$orderby`, paging with `@odata.nextLink` |
+| P05_04 | done | Graph API: parse `conversationId`, group messages into threads, sort `receivedDateTime asc` (Phase 1 strategy) |
+| P05_05 | done | OpenAI client: call the Chat Completions API, parse JSON output (summary, priority, action_required) |
+| P05_06 | done | OpenRouter client: same interface as OpenAI, different base URL + auth header |
+| P05_07 | done | Power Automate client (POC): POST to webhook URL, parse Copilot JSON response |
+| P05_08 | done | Retry + timeout logic for all external HTTP calls (3 retries with backoff, 30s timeout) |
 
 ---
 
