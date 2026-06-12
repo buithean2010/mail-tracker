@@ -102,14 +102,14 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P07_01 | todo | Auth handlers: `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout` |
-| P07_02 | todo | Thread handlers: `GET /threads` (filters: status, priority, date, search), `PATCH /threads/:id`, `POST /threads/:id/resummary` |
-| P07_03 | todo | User handlers: `GET /users/me`, `PATCH /users/me`, `GET /users/me/filter`, `PATCH /users/me/filter` |
-| P07_04 | todo | API key handlers: `POST /users/me/api-key` (BYOK + PA body validation), `DELETE /users/me/api-key` |
-| P07_05 | todo | Mail handlers: `POST /mail/sync` (trigger a background sync job for the current user), `GET /mail/sync/:job_id` |
-| P07_06 | todo | SSE handler: `GET /events` — upgrade connection, register broker channel, stream events, clean up on disconnect |
-| P07_07 | todo | Middleware: CORS (allow only frontend origin), request logging, error recovery, rate limiting |
-| P07_08 | todo | AI key test endpoint: `POST /users/me/api-key/test` — run a sample AI call and return the result without saving |
+| P07_01 | done | Auth handlers: `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout` |
+| P07_02 | done | Thread handlers: `GET /threads` (filters: status, priority, date, search), `PATCH /threads/:id`, `POST /threads/:id/resummary` |
+| P07_03 | done | User handlers: `GET /users/me`, `PATCH /users/me`, `GET /users/me/filter`, `PATCH /users/me/filter` |
+| P07_04 | done | API key handlers: `POST /users/me/api-key` (BYOK + PA body validation), `DELETE /users/me/api-key` |
+| P07_05 | done | Mail handlers: `POST /mail/sync` (trigger a background sync job for the current user), `GET /mail/sync/:job_id` |
+| P07_06 | done | SSE handler: `GET /events` — upgrade connection, register broker channel, stream events, clean up on disconnect |
+| P07_07 | done | Middleware: CORS (allow only frontend origin), request logging, error recovery, rate limiting |
+| P07_08 | done | AI key test endpoint: `POST /users/me/api-key/test` — run a sample AI call and return the result without saving |
 
 ---
 
