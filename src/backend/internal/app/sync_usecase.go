@@ -87,24 +87,23 @@ func (uc *SyncUseCase) syncUser(ctx context.Context, user *domain.User) error {
 		token = newToken
 	}
 
-	since := time.Now().Add(-30 * 24 * time.Hour) // default: 30 days on first sync
-	if user.LastSyncedAt != nil {
-		since = *user.LastSyncedAt
-	}
-	syncStarted := time.Now().UTC()
-
-	messages, err := uc.mailClient.FetchMessages(ctx, token.AccessToken, since)
-	if err != nil {
-		return fmt.Errorf("fetch messages: %w", err)
-	}
-
 	filter, err := domain.ParseFilterSettings(user.FilterSettings)
 	if err != nil {
 		log.Printf("user %s: invalid filter settings, syncing all", user.ID)
 		filter = &domain.FilterSettings{}
 	}
 
-	// Group messages by conversationId (Phase 1: sort by receivedAt asc)
+	since := time.Now().Add(-30 * 24 * time.Hour) // default: 30 days on first sync
+	if user.LastSyncedAt != nil {
+		since = *user.LastSyncedAt
+	}
+	syncStarted := time.Now().UTC()
+
+	messages, err := uc.mailClient.FetchMessages(ctx, token.AccessToken, since, filter.WatchedFolders)
+	if err != nil {
+		return fmt.Errorf("fetch messages: %w", err)
+	}
+
 	grouped := groupByConversation(messages)
 
 	for convID, msgs := range grouped {

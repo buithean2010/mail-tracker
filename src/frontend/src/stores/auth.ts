@@ -6,6 +6,7 @@ export interface FilterSettings {
   my_email: string
   my_name: string
   my_name_aliases: string[]
+  watched_folders: string[]
   pull_conditions: {
     to_me: boolean
     cc_me: boolean

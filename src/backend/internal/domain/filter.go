@@ -6,9 +6,10 @@ import (
 )
 
 type FilterSettings struct {
-	MyEmail       string   `json:"my_email"`
-	MyName        string   `json:"my_name"`
-	MyNameAliases []string `json:"my_name_aliases"`
+	MyEmail        string   `json:"my_email"`
+	MyName         string   `json:"my_name"`
+	MyNameAliases  []string `json:"my_name_aliases"`
+	WatchedFolders []string `json:"watched_folders"` // Outlook folder names to sync; defaults to ["Inbox"] if empty
 	PullConditions struct {
 		ToMe           bool `json:"to_me"`
 		CcMe           bool `json:"cc_me"`

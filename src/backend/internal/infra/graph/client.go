@@ -36,29 +36,54 @@ func NewClientWithTransport(baseURL string, rt http.RoundTripper) *Client {
 	return &Client{http: &http.Client{Timeout: timeout, Transport: rt}, baseURL: baseURL}
 }
 
-// FetchMessages pulls all inbox messages received after `since`, following @odata.nextLink pages.
-func (c *Client) FetchMessages(ctx context.Context, accessToken string, since time.Time) ([]*domain.MailMessage, error) {
+// FetchMessages pulls messages from each watched folder since the given time, deduplicating by message ID.
+// If folders is empty, defaults to ["Inbox"].
+func (c *Client) FetchMessages(ctx context.Context, accessToken string, since time.Time, folders []string) ([]*domain.MailMessage, error) {
+	if len(folders) == 0 {
+		folders = []string{"Inbox"}
+	}
+
+	seen := make(map[string]struct{})
+	var all []*domain.MailMessage
+
+	for _, folder := range folders {
+		msgs, err := c.fetchFolder(ctx, accessToken, since, folder)
+		if err != nil {
+			return nil, fmt.Errorf("folder %q: %w", folder, err)
+		}
+		for _, m := range msgs {
+			if _, dup := seen[m.ID]; !dup {
+				seen[m.ID] = struct{}{}
+				all = append(all, m)
+			}
+		}
+	}
+
+	return all, nil
+}
+
+func (c *Client) fetchFolder(ctx context.Context, accessToken string, since time.Time, folder string) ([]*domain.MailMessage, error) {
 	sinceStr := since.UTC().Format(time.RFC3339)
 	q := url.Values{}
 	q.Set("$select", selectFields)
 	q.Set("$filter", "receivedDateTime ge "+sinceStr)
 	q.Set("$orderby", "receivedDateTime desc")
 	q.Set("$top", "100")
-	endpoint := c.baseURL + "/me/mailFolders/Inbox/messages?" + q.Encode()
+	endpoint := c.baseURL + "/me/mailFolders/" + url.PathEscape(folder) + "/messages?" + q.Encode()
 
-	var all []*domain.MailMessage
-	maxPages := 50 // guard against runaway paging
+	var msgs []*domain.MailMessage
+	maxPages := 50
 
 	for i := 0; i < maxPages && endpoint != ""; i++ {
-		msgs, next, err := c.fetchPage(ctx, accessToken, endpoint)
+		page, next, err := c.fetchPage(ctx, accessToken, endpoint)
 		if err != nil {
 			return nil, err
 		}
-		all = append(all, msgs...)
+		msgs = append(msgs, page...)
 		endpoint = next
 	}
 
-	return all, nil
+	return msgs, nil
 }
 
 type msMessageResponse struct {

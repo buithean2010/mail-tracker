@@ -80,7 +80,7 @@ func TestFetchMessages_SinglePage(t *testing.T) {
 	})
 
 	client := graph.NewClientWithTransport("https://graph.microsoft.com/v1.0", rt)
-	msgs, err := client.FetchMessages(context.Background(), "mytoken", time.Now().Add(-24*time.Hour))
+	msgs, err := client.FetchMessages(context.Background(), "mytoken", time.Now().Add(-24*time.Hour), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -137,7 +137,7 @@ func TestFetchMessages_Pagination(t *testing.T) {
 	})
 
 	client := graph.NewClientWithTransport("https://graph.microsoft.com/v1.0", rt)
-	msgs, err := client.FetchMessages(context.Background(), "token", time.Now().Add(-24*time.Hour))
+	msgs, err := client.FetchMessages(context.Background(), "token", time.Now().Add(-24*time.Hour), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -159,7 +159,7 @@ func TestFetchMessages_EmptyResponse(t *testing.T) {
 	})
 
 	client := graph.NewClientWithTransport("https://graph.microsoft.com/v1.0", rt)
-	msgs, err := client.FetchMessages(context.Background(), "token", time.Now().Add(-24*time.Hour))
+	msgs, err := client.FetchMessages(context.Background(), "token", time.Now().Add(-24*time.Hour), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -175,7 +175,7 @@ func TestFetchMessages_Unauthorized(t *testing.T) {
 	})
 
 	client := graph.NewClientWithTransport("https://graph.microsoft.com/v1.0", rt)
-	_, err := client.FetchMessages(context.Background(), "bad-token", time.Now().Add(-24*time.Hour))
+	_, err := client.FetchMessages(context.Background(), "bad-token", time.Now().Add(-24*time.Hour), nil)
 	if err == nil {
 		t.Error("expected error for 401 response, got nil")
 	}
@@ -188,7 +188,7 @@ func TestFetchMessages_ServerError(t *testing.T) {
 	})
 
 	client := graph.NewClientWithTransport("https://graph.microsoft.com/v1.0", rt)
-	_, err := client.FetchMessages(context.Background(), "token", time.Now().Add(-24*time.Hour))
+	_, err := client.FetchMessages(context.Background(), "token", time.Now().Add(-24*time.Hour), nil)
 	if err == nil {
 		t.Error("expected error for 500 response, got nil")
 	}
@@ -203,7 +203,7 @@ func TestFetchMessages_BearerTokenForwarded(t *testing.T) {
 	})
 
 	client := graph.NewClientWithTransport("https://graph.microsoft.com/v1.0", rt)
-	_, _ = client.FetchMessages(context.Background(), "my-secret-token", time.Now().Add(-1*time.Hour))
+	_, _ = client.FetchMessages(context.Background(), "my-secret-token", time.Now().Add(-1*time.Hour), nil)
 	if gotAuth != "Bearer my-secret-token" {
 		t.Errorf("Authorization header = %q, want Bearer my-secret-token", gotAuth)
 	}

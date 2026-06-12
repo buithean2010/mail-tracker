@@ -20,6 +20,26 @@
         <label>My name
           <input v-model="filter.my_name" />
         </label>
+
+        <fieldset>
+          <legend>Watched folders</legend>
+          <p class="field-hint">Outlook folders to pull mail from. Leave empty to use Inbox only.</p>
+          <div class="tag-list">
+            <span v-for="(folder, i) in filter.watched_folders" :key="i" class="tag">
+              {{ folder }}
+              <button type="button" class="tag-remove" @click="removeFolder(i)">×</button>
+            </span>
+          </div>
+          <div class="tag-input-row">
+            <input
+              v-model="newFolder"
+              placeholder="e.g. Projects/Alpha"
+              @keydown.enter.prevent="addFolder"
+            />
+            <button type="button" class="btn-secondary" @click="addFolder">Add</button>
+          </div>
+        </fieldset>
+
         <fieldset>
           <legend>Pull when</legend>
           <label><input v-model="filter.pull_conditions.to_me" type="checkbox" /> To me</label>
@@ -97,11 +117,26 @@ const saving = ref(false)
 const testing = ref(false)
 const jsonError = ref('')
 const aiResult = ref<{ ok: boolean; msg: string } | null>(null)
+const newFolder = ref('')
+
+function addFolder() {
+  const name = newFolder.value.trim()
+  if (!name) return
+  if (!filter.value.watched_folders.includes(name)) {
+    filter.value.watched_folders.push(name)
+  }
+  newFolder.value = ''
+}
+
+function removeFolder(index: number) {
+  filter.value.watched_folders.splice(index, 1)
+}
 
 const defaultFilter: FilterSettings = {
   my_email: '',
   my_name: '',
   my_name_aliases: [],
+  watched_folders: [],
   pull_conditions: { to_me: true, cc_me: true, mention_email: true, mention_name: true, mention_aliases: true },
   exclude: { senders: [], subject_keywords: [] },
 }
@@ -206,4 +241,11 @@ textarea { width: 100%; box-sizing: border-box; font-family: monospace; font-siz
 .error-msg { color: #d32f2f; font-size: 13px; }
 .warn-msg { color: #f57c00; font-size: 13px; }
 .success-msg { color: #388e3c; font-size: 13px; }
+.field-hint { margin: 0 0 10px; font-size: 13px; color: #666; font-weight: normal; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 24px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; background: #e3f2fd; border: 1px solid #90caf9; border-radius: 4px; padding: 2px 8px; font-size: 13px; }
+.tag-remove { background: none; border: none; cursor: pointer; color: #555; font-size: 15px; line-height: 1; padding: 0; }
+.tag-remove:hover { color: #d32f2f; }
+.tag-input-row { display: flex; gap: 8px; }
+.tag-input-row input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
 </style>

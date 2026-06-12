@@ -49,7 +49,9 @@ type APIKeyRepo interface {
 }
 
 type MailClient interface {
-	FetchMessages(ctx context.Context, accessToken string, since time.Time) ([]*MailMessage, error)
+	// FetchMessages pulls mail from the given folders since the given time.
+	// If folders is empty, implementations must default to ["Inbox"].
+	FetchMessages(ctx context.Context, accessToken string, since time.Time, folders []string) ([]*MailMessage, error)
 }
 
 type AIClient interface {
