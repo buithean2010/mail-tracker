@@ -27,6 +27,11 @@ func RegisterRoutes(r *gin.Engine, d Deps) {
 	r.Use(CORSMiddleware(d.FrontendURL))
 
 	authH := newAuthHandler(d.AuthUC, d.Secure)
+	threadH := newThreadHandler(d.ThreadUC)
+	userH := newUserHandler(d.UserUC)
+	apiKeyH := newAPIKeyHandler(d.UserUC, d.SummaryUC)
+	mailH := newMailHandler(d.SyncUC)
+	sseH := newSSEHandler(d.Broker)
 
 	// Auth routes (public)
 	auth := r.Group("/auth")
@@ -44,8 +49,32 @@ func RegisterRoutes(r *gin.Engine, d Deps) {
 	// Protected API routes
 	api := r.Group("/api")
 	api.Use(SessionMiddleware(d.SessionRepo, d.UserRepo, d.TokenRepo, d.AuthUC))
+	api.Use(RateLimitMiddleware(120, 60)) // 120 req/min per user
 	{
-		// Full route registration in P07
+		// Threads
+		api.GET("/threads", threadH.List)
+		api.PATCH("/threads/:id", threadH.Update)
+		api.POST("/threads/:id/resummary", threadH.Resummary)
+
+		// User profile + filter
+		api.GET("/users/me", userH.GetMe)
+		api.PATCH("/users/me", userH.UpdateMe)
+		api.GET("/users/me/filter", userH.GetFilter)
+		api.PATCH("/users/me/filter", userH.UpdateFilter)
+
+		// API key management
+		api.POST("/users/me/api-key", apiKeyH.Upsert)
+		api.DELETE("/users/me/api-key", apiKeyH.Delete)
+		api.POST("/users/me/api-key/test", apiKeyH.Test)
+
+		// Mail sync
+		api.POST("/mail/sync", mailH.TriggerSync)
+		api.GET("/mail/sync/:job_id", mailH.GetSyncStatus)
+
+		// SSE stream
+		api.GET("/events", sseH.Stream)
+
+		// Auth check
 		api.GET("/healthz/auth", func(c *gin.Context) {
 			c.JSON(200, gin.H{"ok": true})
 		})

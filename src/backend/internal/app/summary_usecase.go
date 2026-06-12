@@ -93,6 +93,30 @@ func (uc *SummaryUseCase) SummarizeThread(ctx context.Context, threadID string) 
 	return nil
 }
 
+// TestKey runs a sample AI call with the provided key without persisting anything.
+func (uc *SummaryUseCase) TestKey(ctx context.Context, key *domain.UserAPIKey) (*domain.SummaryResult, error) {
+	sample := []*domain.MailMessage{
+		{
+			Subject:     "Test: AI config verification",
+			From:        "test@example.com",
+			BodyPreview: "This is a test message to verify your AI configuration.",
+			Body:        "This is a test message to verify your AI configuration is working correctly.",
+		},
+	}
+
+	switch key.AIMode {
+	case domain.AIModeByok:
+		if key.Provider == domain.AIProviderOpenRouter {
+			return uc.openrouterCli.Summarize(ctx, key.APIKey, key.Model, sample)
+		}
+		return uc.openaiCli.Summarize(ctx, key.APIKey, key.Model, sample)
+	case domain.AIModePA:
+		return uc.paCli.Summarize(ctx, key.PAWebhookURL, sample)
+	default:
+		return nil, domain.ErrInvalidInput
+	}
+}
+
 func (uc *SummaryUseCase) summarize(ctx context.Context, thread *domain.EmailThread) error {
 	if err := uc.threadRepo.UpdateSummaryStatus(ctx, thread.ID, domain.SummaryStatusProcessing); err != nil {
 		return err

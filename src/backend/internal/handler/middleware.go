@@ -3,6 +3,8 @@ package handler
 import (
 	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -66,6 +68,46 @@ func SessionMiddleware(
 
 func setNeedsReauth(c *gin.Context, repo domain.UserRepo, user *domain.User) error {
 	return repo.SetNeedsReauth(c.Request.Context(), user.ID, true)
+}
+
+// RateLimitMiddleware enforces a fixed-window rate limit per user (or IP for unauthenticated routes).
+// maxReqs requests are allowed per windowSec seconds.
+func RateLimitMiddleware(maxReqs int, windowSec int) gin.HandlerFunc {
+	type window struct {
+		count int64
+		start int64 // unix seconds
+	}
+	var (
+		mu      sync.Mutex
+		buckets = make(map[string]*window)
+	)
+	max := int64(maxReqs)
+	win := int64(windowSec)
+
+	return func(c *gin.Context) {
+		key := c.ClientIP()
+		if u := userFromCtx(c); u != nil {
+			key = u.ID.String()
+		}
+
+		now := time.Now().Unix()
+		mu.Lock()
+		b, ok := buckets[key]
+		if !ok || now-b.start >= win {
+			buckets[key] = &window{count: 1, start: now}
+			mu.Unlock()
+			c.Next()
+			return
+		}
+		if b.count >= max {
+			mu.Unlock()
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "rate limit exceeded"})
+			return
+		}
+		b.count++
+		mu.Unlock()
+		c.Next()
+	}
 }
 
 // CORSMiddleware sets CORS headers for the frontend origin.
