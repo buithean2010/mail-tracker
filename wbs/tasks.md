@@ -87,14 +87,14 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P06_01 | todo | Job scheduler: 30-minute ticker, run Job 1 + Job 2 independently, structured logging |
-| P06_02 | todo | Job 1 — Mail sync: fetch active users (session within 7 days), use each user's OAuth token, pull Graph API, apply `filter_settings`, upsert `email_threads` |
-| P06_03 | todo | Job 1 — Filter logic: `to_me`, `cc_me`, `mention_email`, `mention_name`, `mention_aliases`, `exclude.senders`, `exclude.subject_keywords` |
-| P06_04 | todo | Job 2 — AI summary: fetch threads with `summary_status=pending`, run fallback chain (BYOK → PA → no_key), update status + fields |
-| P06_05 | todo | Job 2 — Concurrency: process multiple users in parallel (goroutines + semaphore), rate limit per AI provider |
-| P06_06 | todo | SSE Broker: `map[userID]chan Event`, publish/subscribe pattern, per-user channel cleanup on disconnect |
-| P06_07 | todo | SSE Broker: 30-second heartbeat goroutine to keep proxy connections alive, automatically clean up stale channels |
-| P06_08 | todo | Job 1 publishes a `sync_complete` event into the broker after sync finishes for each user |
+| P06_01 | done | Job scheduler: 30-minute ticker, run Job 1 + Job 2 independently, structured logging |
+| P06_02 | done | Job 1 — Mail sync: fetch active users (session within 7 days), use each user's OAuth token, pull Graph API, apply `filter_settings`, upsert `email_threads` |
+| P06_03 | done | Job 1 — Filter logic: `to_me`, `cc_me`, `mention_email`, `mention_name`, `mention_aliases`, `exclude.senders`, `exclude.subject_keywords` |
+| P06_04 | done | Job 2 — AI summary: fetch threads with `summary_status=pending`, run fallback chain (BYOK → PA → no_key), update status + fields |
+| P06_05 | done | Job 2 — Concurrency: process multiple users in parallel (goroutines + semaphore), rate limit per AI provider |
+| P06_06 | done | SSE Broker: `map[userID]chan Event`, publish/subscribe pattern, per-user channel cleanup on disconnect |
+| P06_07 | done | SSE Broker: 30-second heartbeat goroutine to keep proxy connections alive, automatically clean up stale channels |
+| P06_08 | done | Job 1 publishes a `sync_complete` event into the broker after sync finishes for each user |
 
 ---
 

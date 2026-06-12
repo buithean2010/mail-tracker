@@ -5,17 +5,32 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
+
+	"github.com/google/uuid"
 
 	"github.com/buithean2010/mail-tracker/backend/internal/domain"
 )
 
+// Concurrency limits: max parallel users and per-provider AI request limits.
+const (
+	maxConcurrentUsers     = 8
+	maxOpenAIConcurrent    = 5
+	maxOpenRouterConcurrent = 5
+	maxPAConcurrent        = 3
+)
+
 type SummaryUseCase struct {
-	threadRepo  domain.ThreadRepo
-	apiKeyRepo  domain.APIKeyRepo
-	openaiCli   domain.AIClient
+	threadRepo    domain.ThreadRepo
+	apiKeyRepo    domain.APIKeyRepo
+	openaiCli     domain.AIClient
 	openrouterCli domain.AIClient
-	paCli       domain.PAClient
-	enc         domain.Encryptor
+	paCli         domain.PAClient
+	enc           domain.Encryptor
+
+	semOpenAI     chan struct{}
+	semOpenRouter chan struct{}
+	semPA         chan struct{}
 }
 
 func NewSummaryUseCase(
@@ -33,20 +48,43 @@ func NewSummaryUseCase(
 		openrouterCli: openrouterCli,
 		paCli:         paCli,
 		enc:           enc,
+		semOpenAI:     make(chan struct{}, maxOpenAIConcurrent),
+		semOpenRouter: make(chan struct{}, maxOpenRouterConcurrent),
+		semPA:         make(chan struct{}, maxPAConcurrent),
 	}
 }
 
+// RunAll processes all pending summary threads in parallel, grouped by user.
 func (uc *SummaryUseCase) RunAll(ctx context.Context) error {
 	threads, err := uc.threadRepo.GetPendingSummaries(ctx)
 	if err != nil {
 		return fmt.Errorf("get pending summaries: %w", err)
 	}
 
+	byUser := make(map[uuid.UUID][]*domain.EmailThread)
 	for _, t := range threads {
-		if err := uc.summarize(ctx, t); err != nil {
-			log.Printf("summarize thread %s: %v", t.ID, err)
-		}
+		byUser[t.UserID] = append(byUser[t.UserID], t)
 	}
+
+	userSem := make(chan struct{}, maxConcurrentUsers)
+	var wg sync.WaitGroup
+
+	for userID, userThreads := range byUser {
+		wg.Add(1)
+		userSem <- struct{}{}
+		go func(uid uuid.UUID, ts []*domain.EmailThread) {
+			defer wg.Done()
+			defer func() { <-userSem }()
+			log.Printf("[job2] user %s: summarizing %d threads", uid, len(ts))
+			for _, t := range ts {
+				if err := uc.summarize(ctx, t); err != nil {
+					log.Printf("[job2] thread %s: %v", t.ID, err)
+				}
+			}
+		}(userID, userThreads)
+	}
+
+	wg.Wait()
 	return nil
 }
 
@@ -76,16 +114,23 @@ func (uc *SummaryUseCase) summarize(ctx context.Context, thread *domain.EmailThr
 	switch key.AIMode {
 	case domain.AIModeByok:
 		var cli domain.AIClient
+		var sem chan struct{}
 		switch key.Provider {
 		case domain.AIProviderOpenRouter:
 			cli = uc.openrouterCli
+			sem = uc.semOpenRouter
 		default:
 			cli = uc.openaiCli
+			sem = uc.semOpenAI
 		}
+		sem <- struct{}{}
 		result, err = cli.Summarize(ctx, key.APIKey, key.Model, messages)
+		<-sem
 
 	case domain.AIModePA:
+		uc.semPA <- struct{}{}
 		result, err = uc.paCli.Summarize(ctx, key.PAWebhookURL, messages)
+		<-uc.semPA
 
 	default:
 		return uc.threadRepo.UpdateSummaryStatus(ctx, thread.ID, domain.SummaryStatusNoKey)
