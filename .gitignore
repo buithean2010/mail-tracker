@@ -1,0 +1,33 @@
+# ─── Environment & Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ─── Go ───────────────────────────────────────────────────────────────────────
+src/backend/bin/
+src/backend/tmp/          # air hot-reload output
+src/backend/migrate       # downloaded migrate binary
+
+# ─── Node / Vue / Vite ────────────────────────────────────────────────────────
+node_modules/
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/.vite/
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+# (docker-compose files are committed; only runtime artifacts ignored)
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Claude Code (local-only settings) ───────────────────────────────────────
+.claude/settings.local.json
+.remember/
