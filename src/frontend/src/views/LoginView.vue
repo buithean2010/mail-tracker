@@ -13,11 +13,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
 const reauthRequired = computed(() => route.query.reauth === '1')
+
+onMounted(async () => {
+  if (reauthRequired.value) return
+  try {
+    await auth.fetchMe()
+    if (auth.user) router.replace('/')
+  } catch {
+    // not authenticated — stay on login page
+  }
+})
 </script>
 
 <style scoped>
