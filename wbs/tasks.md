@@ -117,18 +117,18 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P08_01 | todo | App shell: Vue Router (login, dashboard, settings), Pinia store setup, axios instance with credentials |
-| P08_02 | todo | Login page: one "Login with Microsoft" button, auto-redirect if session is valid, handle `reauth_required` error |
-| P08_03 | todo | Dashboard: thread list component, tier-based columns (Tier 1 vs Tier 2), loading + empty states |
-| P08_04 | todo | Dashboard: filter bar (date range, status, priority, sender, search text), debounced input |
-| P08_05 | todo | Dashboard: sync button → `POST /mail/sync` → polling or wait for SSE `sync_complete` → refresh list |
-| P08_06 | todo | Dashboard: warning banner for `no_ai_key` or `needs_reauth` (from `GET /users/me`) |
-| P08_07 | todo | Thread detail: slide-in drawer, render full thread messages, re-summarize button, notes input, deep link to Outlook |
-| P08_08 | todo | Settings — Filter config: form editor ↔ raw JSON tab (two-way, real-time sync), validate JSON |
-| P08_09 | todo | Settings — AI config: BYOK vs PA radio, conditional form fields, test button, save |
-| P08_10 | todo | SSE integration: `EventSource('/events', {withCredentials: true})`, `sync_complete` → `fetchThreads()`, heartbeat listener |
-| P08_11 | todo | Tier-aware UI: hide/show columns + actions based on `summary_status` and the user's AI config |
-| P08_12 | todo | Inline status dropdown on the dashboard (Tier 2): call `PATCH /threads/:id` immediately on change |
+| P08_01 | done | App shell: Vue Router (login, dashboard, settings), Pinia store setup, axios instance with credentials |
+| P08_02 | done | Login page: one "Login with Microsoft" button, auto-redirect if session is valid, handle `reauth_required` error |
+| P08_03 | done | Dashboard: thread list component, tier-based columns (Tier 1 vs Tier 2), loading + empty states |
+| P08_04 | done | Dashboard: filter bar (date range, status, priority, sender, search text), debounced input |
+| P08_05 | done | Dashboard: sync button → `POST /mail/sync` → polling or wait for SSE `sync_complete` → refresh list |
+| P08_06 | done | Dashboard: warning banner for `no_ai_key` or `needs_reauth` (from `GET /users/me`) |
+| P08_07 | done | Thread detail: slide-in drawer, render full thread messages, re-summarize button, notes input, deep link to Outlook |
+| P08_08 | done | Settings — Filter config: form editor ↔ raw JSON tab (two-way, real-time sync), validate JSON |
+| P08_09 | done | Settings — AI config: BYOK vs PA radio, conditional form fields, test button, save |
+| P08_10 | done | SSE integration: `EventSource('/api/events', {withCredentials: true})`, `sync_complete` → `fetchThreads()`, heartbeat listener |
+| P08_11 | done | Tier-aware UI: hide/show columns + actions based on `summary_status` and the user's AI config |
+| P08_12 | done | Inline status dropdown on the dashboard (Tier 2): call `PATCH /threads/:id` immediately on change |
 
 ---
 
