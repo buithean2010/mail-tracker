@@ -12,24 +12,39 @@ import (
 )
 
 const (
-	baseURL    = "https://graph.microsoft.com/v1.0"
-	selectFields = "id,conversationId,subject,from,toRecipients,ccRecipients,receivedDateTime,bodyPreview,body,internetMessageId"
-	timeout    = 30 * time.Second
+	defaultBaseURL = "https://graph.microsoft.com/v1.0"
+	selectFields   = "id,conversationId,subject,from,toRecipients,ccRecipients,receivedDateTime,bodyPreview,body,internetMessageId"
+	timeout        = 30 * time.Second
 )
 
 type Client struct {
-	http *http.Client
+	http    *http.Client
+	baseURL string
 }
 
 func NewClient() *Client {
-	return &Client{http: &http.Client{Timeout: timeout}}
+	return &Client{http: &http.Client{Timeout: timeout}, baseURL: defaultBaseURL}
+}
+
+// NewClientWithBaseURL creates a client with a custom base URL (for testing).
+func NewClientWithBaseURL(baseURL string) *Client {
+	return &Client{http: &http.Client{Timeout: timeout}, baseURL: baseURL}
+}
+
+// NewClientWithTransport creates a client with a custom RoundTripper (for testing).
+func NewClientWithTransport(baseURL string, rt http.RoundTripper) *Client {
+	return &Client{http: &http.Client{Timeout: timeout, Transport: rt}, baseURL: baseURL}
 }
 
 // FetchMessages pulls all inbox messages received after `since`, following @odata.nextLink pages.
 func (c *Client) FetchMessages(ctx context.Context, accessToken string, since time.Time) ([]*domain.MailMessage, error) {
 	sinceStr := since.UTC().Format(time.RFC3339)
-	endpoint := fmt.Sprintf("%s/me/mailFolders/Inbox/messages?$select=%s&$filter=receivedDateTime ge %s&$orderby=receivedDateTime desc&$top=100",
-		baseURL, url.QueryEscape(selectFields), url.QueryEscape(sinceStr))
+	q := url.Values{}
+	q.Set("$select", selectFields)
+	q.Set("$filter", "receivedDateTime ge "+sinceStr)
+	q.Set("$orderby", "receivedDateTime desc")
+	q.Set("$top", "100")
+	endpoint := c.baseURL + "/me/mailFolders/Inbox/messages?" + q.Encode()
 
 	var all []*domain.MailMessage
 	maxPages := 50 // guard against runaway paging

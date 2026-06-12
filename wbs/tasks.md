@@ -136,12 +136,12 @@
 
 | task_id | status | summary |
 |---|---|---|
-| P09_01 | todo | Unit tests for `domain/` structs + validation logic |
-| P09_02 | todo | Unit tests for `app/` use cases with mocked interfaces |
-| P09_03 | todo | Integration tests for `infra/` repositories (use a test DB, no mocks) |
-| P09_04 | todo | Integration tests for the Graph API client (mock HTTP server) |
-| P09_05 | todo | API handler tests: `httptest`, verify response codes + body |
-| P09_06 | todo | Frontend: Vitest unit tests for Pinia stores + utility functions |
+| P09_01 | done | Unit tests for `domain/` structs + validation logic |
+| P09_02 | done | Unit tests for `app/` use cases with mocked interfaces |
+| P09_03 | done | Integration tests for `infra/` repositories (use a test DB, no mocks) |
+| P09_04 | done | Integration tests for the Graph API client (mock HTTP server) |
+| P09_05 | done | API handler tests: `httptest`, verify response codes + body |
+| P09_06 | done | Frontend: Vitest unit tests for Pinia stores + utility functions |
 
 ---
 
